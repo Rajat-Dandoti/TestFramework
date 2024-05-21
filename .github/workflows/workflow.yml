@@ -1,15 +1,26 @@
 name: CI/CD Pipeline
+
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30  # Overall job timeout
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        if: success()
+
       - name: Build Docker Images
         run: |
           docker build -t myregistry/test-python:latest -f docker/Dockerfile.python .
@@ -18,12 +29,31 @@ jobs:
           docker push myregistry/test-python:latest
           docker push myregistry/test-javascript:latest
           docker push myregistry/test-java:latest
+        timeout-minutes: 15  # Step timeout
+
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f kubernetes/deployment.yaml
           kubectl apply -f kubernetes/service.yaml
-      - name: Run Tests
+        timeout-minutes: 5  # Step timeout
+
+      - name: Run Python Tests
         run: |
           docker run myregistry/test-python:latest
+        timeout-minutes: 10  # Step timeout
+
+      - name: Run JavaScript Tests
+        run: |
           docker run myregistry/test-javascript:latest
+        timeout-minutes: 10  # Step timeout
+
+      - name: Run Java Tests
+        run: |
           docker run myregistry/test-java:latest
+        timeout-minutes: 10  # Step timeout
+
+      - name: Clean up Docker
+        if: always()
+        run: |
+          docker system prune -f
+          docker container prune -f
