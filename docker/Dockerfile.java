@@ -1,5 +1,7 @@
 # docker/Dockerfile.java
-FROM openjdk:21
+FROM maven:3.8.1-jdk-11
 WORKDIR /app
-COPY . .
-CMD ["./gradlew", "test"]
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean install
+CMD ["mvn", "test"]
