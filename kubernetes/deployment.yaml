@@ -1,20 +1,27 @@
-# kubernetes/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-deployment
+  name: multi-container-deployment
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: test-app
+      app: multi-container-app
   template:
     metadata:
       labels:
-        app: test-app
+        app: multi-container-app
     spec:
       containers:
-        - name: test-container
-          image: myregistry/test-python:latest
+        - name: python-container
+          image: ${{ secrets.DOCKER_USERNAME }}/test-python:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8000
+        - name: javascript-container
+          image: ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+          ports:
+            - containerPort: 8001
+        - name: java-container
+          image: ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+          ports:
+            - containerPort: 8002
