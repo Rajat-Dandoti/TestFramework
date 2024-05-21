@@ -65,6 +65,9 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+          kubectl config set-cluster docker-desktop --server=https://kubernetes.docker.internal:6443 --insecure-skip-tls-verify
+          kubectl config set-context docker-desktop --cluster=docker-desktop --user=docker-desktop
+          kubectl config use-context docker-desktop
 
       - name: Deploy to Kubernetes
         run: |
