@@ -49,13 +49,17 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker build -t myregistry/test-python:latest -f docker/Dockerfile.python .
-          docker build -t myregistry/test-javascript:latest -f docker/Dockerfile.javascript .
-          docker build -t myregistry/test-java:latest -f docker/Dockerfile.java .
-          docker push myregistry/test-python:latest
-          docker push myregistry/test-javascript:latest
-          docker push myregistry/test-java:latest
-        timeout-minutes: 15  # Step timeout
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-python:latest -f docker/Dockerfile.python .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest -f docker/Dockerfile.javascript .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-java:latest -f docker/Dockerfile.java .
+        timeout-minutes: 10
+
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-python:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+        timeout-minutes: 10  # Step timeout
 
       - name: Deploy to Kubernetes
         run: |
@@ -65,17 +69,17 @@ jobs:
 
       - name: Run Python Tests
         run: |
-          docker run myregistry/test-python:latest
+          docker run ${{ secrets.DOCKER_USERNAME }}/test-python:latest
         timeout-minutes: 10  # Step timeout
 
       - name: Run JavaScript Tests
         run: |
-          docker run myregistry/test-javascript:latest
+          docker run ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
         timeout-minutes: 10  # Step timeout
 
       - name: Run Java Tests
         run: |
-          docker run myregistry/test-java:latest
+          docker run ${{ secrets.DOCKER_USERNAME }}/test-java:latest
         timeout-minutes: 10  # Step timeout
 
       - name: Clean up Docker
