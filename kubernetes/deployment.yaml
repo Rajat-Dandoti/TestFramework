@@ -14,14 +14,14 @@ spec:
     spec:
       containers:
         - name: python-container
-          image: ${{ secrets.DOCKER_USERNAME }}/test-python:latest
+          image: rajat1012/test-python:latest
           ports:
             - containerPort: 8000
         - name: javascript-container
-          image: ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+          image: rajat1012/test-javascript:latest
           ports:
             - containerPort: 8001
         - name: java-container
-          image: ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+          image: rajat1012/test-java:latest
           ports:
             - containerPort: 8002
