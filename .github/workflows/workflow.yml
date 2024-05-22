@@ -61,25 +61,25 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/test-java:latest
         timeout-minutes: 10  # Step timeout
 
-      - name: Install kubectl
-        run: |
-          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-
-      - name: Set up kubectl
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
-          kubectl config set-cluster docker-desktop --server=http://127.0.0.1:6443 --insecure-skip-tls-verify
-          kubectl config set-context docker-desktop --cluster=docker-desktop --user=docker-desktop
-          kubectl config use-context docker-desktop
-
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f kubernetes/deployment.yaml --validate=false
-          kubectl apply -f kubernetes/service.yaml --validate=false
-        timeout-minutes: 5  # Step timeout
+#      - name: Install kubectl
+#        run: |
+#          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+#          chmod +x ./kubectl
+#          sudo mv ./kubectl /usr/local/bin/kubectl
+#
+#      - name: Set up kubectl
+#        run: |
+#          mkdir -p $HOME/.kube
+#          echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+#          kubectl config set-cluster docker-desktop --server=http://127.0.0.1:6443 --insecure-skip-tls-verify
+#          kubectl config set-context docker-desktop --cluster=docker-desktop --user=docker-desktop
+#          kubectl config use-context docker-desktop
+#
+#      - name: Deploy to Kubernetes
+#        run: |
+#          kubectl apply -f kubernetes/deployment.yaml --validate=false
+#          kubectl apply -f kubernetes/service.yaml --validate=false
+#        timeout-minutes: 5  # Step timeout
 
       - name: Run Python Tests
         run: |
