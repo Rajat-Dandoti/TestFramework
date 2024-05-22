@@ -61,6 +61,12 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/test-java:latest
         timeout-minutes: 10  # Step timeout
 
+      - name: Install kubectl
+        run: |
+          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
       - name: Set up kubectl
         run: |
           mkdir -p $HOME/.kube
