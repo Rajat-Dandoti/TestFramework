@@ -1,0 +1,14 @@
+Resources:
+  TestBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "TestBucket"
+  TestLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Handler: "handler.lambda_handler"
+      Role: "arn:aws:iam::your-account-id:role/execution_role"
+      Code:
+        S3Bucket: "your-s3-bucket-name"
+        S3Key: "lambda_code.zip"
+      Runtime: "python3.8"

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multi-container-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multi-container-app
+  template:
+    metadata:
+      labels:
+        app: multi-container-app
+    spec:
+      containers:
+        - name: python-container
+          image: rajat1012/test-python:latest
+          ports:
+            - containerPort: 8000
+        - name: javascript-container
+          image: rajat1012/test-javascript:latest
+          ports:
+            - containerPort: 8001
+        - name: java-container
+          image: rajat1012/test-java:latest
+          ports:
+            - containerPort: 8002

@@ -1,0 +1,103 @@
+name: CI/CD Pipeline
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # Overall job timeout
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        run: |
+          # Remove any old versions
+          sudo apt-get remove -y docker docker-engine docker.io containerd runc
+          
+          # Update the apt package index and install packages to allow apt to use a repository over HTTPS
+          sudo apt-get update
+          sudo apt-get install -y \
+            apt-transport-https \
+            ca-certificates \
+            curl \
+            gnupg-agent \
+            software-properties-common
+
+          # Add Docker’s official GPG key
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+          # Set up the stable repository
+          sudo add-apt-repository \
+            "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) \
+            stable"
+
+          # Install Docker Engine
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+          
+          # Add the GitHub Actions runner user to the docker group
+          sudo usermod -aG docker $USER
+          newgrp docker
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        if: success()
+
+      - name: Build Docker Images
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-python:latest -f docker/Dockerfile.python .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest -f docker/Dockerfile.javascript .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/test-java:latest -f docker/Dockerfile.java .
+        timeout-minutes: 10
+
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-python:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+        timeout-minutes: 10  # Step timeout
+
+#      - name: Install kubectl
+#        run: |
+#          curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
+#          chmod +x ./kubectl
+#          sudo mv ./kubectl /usr/local/bin/kubectl
+#
+#      - name: Set up kubectl
+#        run: |
+#          mkdir -p $HOME/.kube
+#          echo "${{ secrets.KUBECONFIG_CONTENT }}" > $HOME/.kube/config
+#          kubectl config set-cluster docker-desktop --server=http://127.0.0.1:6443 --insecure-skip-tls-verify
+#          kubectl config set-context docker-desktop --cluster=docker-desktop --user=docker-desktop
+#          kubectl config use-context docker-desktop
+#
+#      - name: Deploy to Kubernetes
+#        run: |
+#          kubectl apply -f kubernetes/deployment.yaml --validate=false
+#          kubectl apply -f kubernetes/service.yaml --validate=false
+#        timeout-minutes: 5  # Step timeout
+
+#      - name: Run Python Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-python:latest
+#        timeout-minutes: 10  # Step timeout
+#
+#      - name: Run JavaScript Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+#        timeout-minutes: 10  # Step timeout
+#
+#      - name: Run Java Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+#        timeout-minutes: 10  # Step timeout
+
+      - name: Clean up Docker
+        if: always()
+        run: |
+          docker system prune -f
+          docker container prune -f
