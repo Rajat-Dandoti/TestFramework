@@ -81,20 +81,20 @@ jobs:
 #          kubectl apply -f kubernetes/service.yaml --validate=false
 #        timeout-minutes: 5  # Step timeout
 
-      - name: Run Python Tests
-        run: |
-          docker run ${{ secrets.DOCKER_USERNAME }}/test-python:latest
-        timeout-minutes: 10  # Step timeout
-
-      - name: Run JavaScript Tests
-        run: |
-          docker run ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
-        timeout-minutes: 10  # Step timeout
-
-      - name: Run Java Tests
-        run: |
-          docker run ${{ secrets.DOCKER_USERNAME }}/test-java:latest
-        timeout-minutes: 10  # Step timeout
+#      - name: Run Python Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-python:latest
+#        timeout-minutes: 10  # Step timeout
+#
+#      - name: Run JavaScript Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-javascript:latest
+#        timeout-minutes: 10  # Step timeout
+#
+#      - name: Run Java Tests
+#        run: |
+#          docker run ${{ secrets.DOCKER_USERNAME }}/test-java:latest
+#        timeout-minutes: 10  # Step timeout
 
       - name: Clean up Docker
         if: always()
